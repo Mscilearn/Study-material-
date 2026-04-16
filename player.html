@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prime Spot | Premium Video Player</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Urbanist"', 'sans-serif'] },
+                    colors: { 
+                        gold: '#FFD700',       
+                        brand: '#6366f1',
+                        darkbg: '#050507',
+                        lightbg: '#F8FAFC'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* SAME CSS AS YOUR MSCI LEARN THEME */
+        body { transition: background-color 0.3s ease, color 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        .dark body { background-color: #050507; color: white; }
+        .light body { background-color: #F8FAFC; color: #0f172a; }
+        @keyframes rotate-border { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .magic-box { position: relative; overflow: hidden; z-index: 1; padding: 2.5px; background: transparent; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .magic-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #FFD700, transparent 30%, #6366f1, transparent 70%, #ff00ff, transparent); animation: rotate-border 4s linear infinite; z-index: -2; }
+        .magic-box::after { content: ""; position: absolute; inset: 2.5px; background: var(--bg-color); z-index: -1; transition: background 0.3s ease; }
+        .magic-box:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.5); }
+        .magic-box:active { transform: scale(0.98); }
+        nav .magic-box:hover { transform: none; box-shadow: none; }
+        
+        .shape-pill { border-radius: 9999px; } .shape-pill::after { border-radius: 9999px; }
+        .shape-card { border-radius: 24px; } .shape-card::after { border-radius: 21.5px; }
+        
+        .dark .magic-box { --bg-color: #101014; }
+        .light .magic-box { --bg-color: #ffffff; }
+        .theme-text { font-weight: 800; transition: color 0.3s; }
+        .dark .theme-text { color: #FFD700; }
+        .light .theme-text { color: #6366f1; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans overflow-x-hidden pb-10">
+
+    <nav class="fixed w-full z-50 top-0 left-0 px-4 py-4">
+        <div class="magic-box shape-pill shadow-2xl mx-auto max-w-4xl w-full">
+            <div class="px-6 py-2.5 flex justify-between items-center bg-white/0 relative z-10 backdrop-blur-xl">
+                <a href="#" class="flex items-center gap-3">
+                    <i class="ph-fill ph-robot text-3xl text-brand dark:text-cyan-400"></i>
+                    <span class="font-black text-xl tracking-tight text-gray-900 dark:text-white">
+                        Prime <span class="theme-text">SpoT</span>
+                    </span>
+                </a>
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 text-xl text-black dark:text-white shadow-sm hover:text-gold">
+                    <i id="themeIcon" class="ph-bold ph-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-32 px-4 max-w-4xl mx-auto w-full flex flex-col gap-6">
+        
+        <div class="magic-box shape-card w-full aspect-video">
+            <div class="w-full h-full relative z-10 rounded-[21.5px] overflow-hidden bg-black flex items-center justify-center" id="videoContainer">
+                <i class="ph-duotone ph-spinner-gap animate-spin text-4xl text-gray-500" id="loadingIcon"></i>
+                <iframe id="videoIframe" class="hidden w-full h-full" frameborder="0" scrolling="0" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4 w-full">
+            <a href="#" id="downloadBtn" target="_blank" class="magic-box shape-pill w-full text-center">
+                <div class="py-4 relative z-10 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500/10 to-green-500/10 dark:from-emerald-500/20 dark:to-green-500/20 rounded-full">
+                    <i class="ph-bold ph-cloud-arrow-down text-2xl text-green-600 dark:text-green-400"></i>
+                    <span class="font-bold text-lg text-green-700 dark:text-green-400 uppercase tracking-wide">Direct Download</span>
+                </div>
+            </a>
+
+            <a href="#" id="telegramBtn" target="_blank" class="magic-box shape-pill w-full text-center">
+                <div class="py-4 relative z-10 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-full">
+                    <i class="ph-bold ph-telegram-logo text-2xl text-blue-600 dark:text-blue-400"></i>
+                    <span class="font-bold text-lg text-blue-700 dark:text-blue-400 uppercase tracking-wide">Get File in Telegram</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="magic-box shape-card w-full mt-2">
+            <div class="p-6 relative z-10 flex flex-col gap-4">
+                <div class="flex justify-between items-center border-b border-gray-200 dark:border-white/10 pb-4">
+                    <h3 class="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="ph-fill ph-info text-cyan-500"></i> File Details
+                    </h3>
+                    <div class="flex items-center gap-2 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">
+                        <i class="ph-bold ph-eye text-cyan-500"></i>
+                        <span class="text-sm font-bold text-cyan-500" id="viewCount">... views</span>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-between gap-2">
+                    <span class="text-gray-500 font-medium">Filename</span>
+                    <span class="font-bold text-gray-900 dark:text-white text-right break-words max-w-xs" id="videoTitle">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // 1. Theme Toggle Logic
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        function setThemeIcons(isDark) {
+            themeIcon.className = isDark ? 'ph-bold ph-sun' : 'ph-bold ph-moon';
+        }
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark'); html.classList.remove('light'); setThemeIcons(true);
+        } else {
+            html.classList.add('light'); html.classList.remove('dark'); setThemeIcons(false);
+        }
+
+        function toggleTheme() {
+            if (html.classList.contains('dark')) {
+                html.classList.replace('dark', 'light'); localStorage.theme = 'light'; setThemeIcons(false);
+            } else {
+                html.classList.replace('light', 'dark'); localStorage.theme = 'dark'; setThemeIcons(true);
+            }
+        }
+
+        // 2. Firebase Configuration (REPLACE WITH YOUR KEYS)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 3. Fetch Video Logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+
+        if(videoId) {
+            const docRef = db.collection("videos").doc(videoId);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('loadingIcon').classList.add('hidden');
+                    
+                    const iframe = document.getElementById('videoIframe');
+                    iframe.src = data.iframeUrl;
+                    iframe.classList.remove('hidden');
+
+                    document.getElementById('videoTitle').innerText = data.title;
+                    document.getElementById('downloadBtn').href = data.downloadUrl;
+                    document.getElementById('telegramBtn').href = data.telegramUrl;
+                    
+                    // Increment View Count Update
+                    let currentViews = data.views || 0;
+                    document.getElementById('viewCount').innerText = `${currentViews + 1} views`;
+                    docRef.update({ views: currentViews + 1 });
+                } else {
+                    document.getElementById('videoTitle').innerText = "Video not found!";
+                    document.getElementById('loadingIcon').className = 'ph-bold ph-warning-circle text-4xl text-red-500';
+                }
+            }).catch((error) => {
+                console.error("Error getting document:", error);
+            });
+        } else {
+            document.getElementById('videoTitle').innerText = "Invalid Link";
+        }
+    </script>
+</body>
+</html>
