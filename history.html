@@ -2,59 +2,64 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>History | Manage All</title>
+    <title>Manage Videos | Msci Learn</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>body { background: #050507; color: white; font-family: 'Urbanist', sans-serif; }</style>
 </head>
-<body class="bg-[#050507] text-white p-6 font-sans">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-black">Video <span class="text-brand">History</span></h1>
-            <a href="admin.html" class="bg-white/5 px-4 py-2 rounded-lg text-sm border border-white/10">Back to Admin</a>
-        </div>
-        <div id="list" class="grid gap-4">
-            </div>
+<body class="p-6 max-w-4xl mx-auto">
+    
+    <div class="flex justify-between items-center mb-8 mt-10">
+        <h1 class="text-3xl font-black">Video <span class="text-brand">History</span></h1>
+        <a href="admin.html" class="bg-white/5 px-4 py-2 rounded-lg text-sm border border-white/10 hover:bg-white/10">Back to Panel</a>
+    </div>
+
+    <div id="videoList" class="grid gap-4">
+        <p class="text-center text-gray-500 font-bold mt-10">Loading securely...</p>
     </div>
 
     <script>
-        const firebaseConfig = { /* Paste Config Here */ };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const token = sessionStorage.getItem("admin_token");
+        if(!token) { alert("Unauthorized!"); window.location.href = "admin.html"; }
 
-        auth.onAuthStateChanged(user => {
-            if(!user) window.location.href = 'admin.html';
-            loadData();
-        });
-
-        function loadData() {
-            db.collection("videos").orderBy("title", "asc").onSnapshot(snap => {
-                const list = document.getElementById('list');
-                list.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
+        async function loadData() {
+            try {
+                const res = await fetch('/api/video?action=get_all', {
+                    headers: { 'x-api-key': token }
+                });
+                const data = await res.json();
+                const list = document.getElementById('videoList'); list.innerHTML = '';
+                
+                if(data.error) return list.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+                
+                data.videos.forEach(v => {
                     list.innerHTML += `
-                        <div class="bg-[#101014] p-4 rounded-2xl border border-white/10 flex justify-between items-center">
+                        <div class="bg-[#101014] p-5 rounded-2xl border border-white/10 flex justify-between items-center group">
                             <div>
-                                <h3 class="font-bold text-lg">${d.title}</h3>
-                                <p class="text-xs text-gray-500">ID: ${doc.id}</p>
+                                <h3 class="font-bold text-lg text-brand">${v.title}</h3>
+                                <p class="text-xs text-gray-500 mt-1">ID: ${v.id}</p>
                             </div>
-                            <button onclick="deleteDoc('${doc.id}')" class="bg-red-500/10 text-red-500 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-all">
-                                <i class="ph ph-trash"></i> Delete
+                            <button onclick="deleteVideo('${v.id}')" class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors border border-red-500/20">
+                                <i class="ph-bold ph-trash text-lg"></i>
                             </button>
                         </div>
                     `;
                 });
-            });
+            } catch(e) { document.getElementById('videoList').innerHTML = "Network Error"; }
         }
 
-        function deleteDoc(id) {
-            if(confirm("Are you sure?")) db.collection("videos").doc(id).delete();
+        async function deleteVideo(id) {
+            if(confirm("Permanently delete this video?")) {
+                const res = await fetch(`/api/video?action=delete_video&id=${id}`, {
+                    method: 'DELETE',
+                    headers: { 'x-api-key': token }
+                });
+                const data = await res.json();
+                if(data.success) loadData(); else alert(data.error);
+            }
         }
+
+        loadData();
     </script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </body>
 </html>
