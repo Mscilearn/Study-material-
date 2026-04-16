@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Spot | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['"Urbanist"', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        /* Keeping basic dark theme for Admin for speed and focus */
+        body { background-color: #050507; color: white; }
+        .input-field { width: 100%; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; transition: all 0.3s; }
+        .input-field:focus { border-color: #6366f1; box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
+        .magic-btn { background: linear-gradient(to right, #6366f1, #a855f7); padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; transition: transform 0.2s; }
+        .magic-btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="w-full max-w-lg bg-[#101014] p-8 rounded-[24px] border border-white/10 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-[#6366f1] blur-[80px] opacity-40 pointer-events-none"></div>
+
+        <h2 class="text-3xl font-black text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+            Add New Video
+        </h2>
+
+        <form id="addVideoForm" class="flex flex-col gap-5 relative z-10">
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2">Slug (ID) e.g., gSTrz9SWb</label>
+                <input type="text" id="slug" required class="input-field" placeholder="Enter unique ID">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2">Video Title</label>
+                <input type="text" id="title" required class="input-field" placeholder="Full name of the video">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2">Iframe / Embed URL</label>
+                <input type="url" id="iframeUrl" required class="input-field" placeholder="https://short.icu/...">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2">Direct Download URL</label>
+                <input type="url" id="downloadUrl" required class="input-field" placeholder="Download Link">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2">Telegram File URL</label>
+                <input type="url" id="telegramUrl" required class="input-field" placeholder="https://t.me/...">
+            </div>
+
+            <button type="submit" class="magic-btn mt-4">Save to Database</button>
+            <p id="statusMsg" class="text-center font-bold mt-2 text-sm hidden"></p>
+        </form>
+    </div>
+
+    <script>
+        // 1. Firebase Configuration (REPLACE WITH YOUR KEYS)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 2. Form Submit Logic
+        document.getElementById('addVideoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const status = document.getElementById('statusMsg');
+            
+            btn.innerText = "Saving...";
+            status.classList.add('hidden');
+
+            const slug = document.getElementById('slug').value;
+            const data = {
+                slug: slug,
+                title: document.getElementById('title').value,
+                iframeUrl: document.getElementById('iframeUrl').value,
+                downloadUrl: document.getElementById('downloadUrl').value,
+                telegramUrl: document.getElementById('telegramUrl').value,
+                views: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // Using Slug as the Document ID
+            db.collection("videos").doc(slug).set(data)
+            .then(() => {
+                status.innerText = "Video Added Successfully! ✅";
+                status.className = "text-center font-bold mt-2 text-sm text-green-400 block";
+                document.getElementById('addVideoForm').reset();
+                btn.innerText = "Save to Database";
+            })
+            .catch((error) => {
+                status.innerText = "Error: " + error.message;
+                status.className = "text-center font-bold mt-2 text-sm text-red-400 block";
+                btn.innerText = "Save to Database";
+            });
+        });
+    </script>
+</body>
+</html>
