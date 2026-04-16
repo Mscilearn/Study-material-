@@ -2,79 +2,116 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prime Spot | Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msci Learn Player</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: { 
+                    fontFamily: { sans: ['"Urbanist"', 'sans-serif'] }, 
+                    colors: { brand: '#6366f1', gold: '#FFD700' } 
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { transition: background 0.3s; -webkit-tap-highlight-color: transparent; }
-        .dark body { background-color: #050507; color: white; }
+        body { transition: background-color 0.3s ease; -webkit-tap-highlight-color: transparent; }
         .light body { background-color: #F8FAFC; color: #0f172a; }
+        .dark body { background-color: #050507; color: white; }
+        
+        /* 🔥 PREMIUM NEON HEADER 🔥 */
+        @keyframes header-glow {
+            0%, 100% { box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.4), 0 0 10px -3px rgba(168, 85, 247, 0.2); border-color: rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 25px -3px rgba(99, 102, 241, 0.6), 0 0 15px -3px rgba(168, 85, 247, 0.4); border-color: rgba(168, 85, 247, 0.5); }
+        }
+        .neon-header { animation: header-glow 4s infinite; border: 1px solid transparent; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .light .neon-header { background: rgba(255, 255, 255, 0.85); border-color: rgba(99, 102, 241, 0.1); }
+        .dark .neon-header { background: rgba(16, 16, 20, 0.85); border-color: rgba(255, 255, 255, 0.05); }
+
+        /* 🔥 MAGIC CARDS & BUTTONS 🔥 */
         @keyframes rotate-border { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .magic-box { position: relative; overflow: hidden; z-index: 1; padding: 2.5px; background: transparent; transition: transform 0.3s ease; }
-        .magic-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #FFD700, transparent 30%, #6366f1, transparent 70%, #ff00ff, transparent); animation: rotate-border 4s linear infinite; z-index: -2; }
-        .magic-box::after { content: ""; position: absolute; inset: 2.5px; background: var(--bg-color); z-index: -1; transition: background 0.3s ease; }
-        .dark .magic-box { --bg-color: #101014; }
-        .light .magic-box { --bg-color: #ffffff; }
-        .shape-pill { border-radius: 9999px; } .shape-pill::after { border-radius: 9999px; }
-        .shape-card { border-radius: 24px; } .shape-card::after { border-radius: 21.5px; }
+        .magic-card { position: relative; border-radius: 1.5rem; overflow: hidden; z-index: 1; padding: 2px; background: transparent; }
+        .magic-card::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #6366f1, transparent 30%, #a855f7, transparent 70%, #6366f1); animation: rotate-border 4s linear infinite; z-index: -2; }
+        .magic-card::after { content: ""; position: absolute; inset: 2px; border-radius: 1.4rem; background: var(--card-bg); z-index: -1; }
+        .dark .magic-card { --card-bg: #101014; } .light .magic-card { --card-bg: #ffffff; }
+
+        .magic-btn { position: relative; border-radius: 1rem; overflow: hidden; z-index: 1; padding: 2px; display: flex; cursor: pointer; transition: transform 0.3s; }
+        .magic-btn::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #FFD700, transparent 30%, #9333ea, transparent 70%, #FFD700); animation: rotate-border 3s linear infinite; z-index: -2; }
+        .magic-btn::after { content: ""; position: absolute; inset: 2px; border-radius: 0.9rem; background: var(--btn-bg); z-index: -1; }
+        .magic-btn:hover { transform: scale(1.02); }
+        .dark .magic-btn { --btn-bg: #18181b; } .light .magic-btn { --btn-bg: #f8fafc; }
     </style>
 </head>
-<body class="min-h-screen pb-10 font-sans">
-    <nav class="fixed w-full z-50 top-0 left-0 px-4 py-4">
-        <div class="magic-box shape-pill shadow-2xl mx-auto max-w-4xl w-full">
-            <div class="px-6 py-2.5 flex justify-between items-center bg-white/0 relative z-10 backdrop-blur-xl">
-                <a href="#" class="flex items-center gap-2">
-                    <i class="ph-fill ph-robot text-3xl text-brand dark:text-gold"></i>
-                    <span class="font-black text-xl tracking-tight dark:text-white">Prime <span class="text-brand dark:text-gold">SpoT</span></span>
-                </a>
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 text-xl dark:text-white hover:text-gold transition-colors">
-                    <i id="themeIcon" class="ph-bold ph-moon"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
+<body class="min-h-screen pb-10">
 
-    <main class="pt-32 px-4 max-w-4xl mx-auto flex flex-col gap-6">
-        <div class="magic-box shape-card aspect-video w-full">
-            <div class="w-full h-full relative z-10 bg-black rounded-[21.5px] overflow-hidden flex items-center justify-center">
-                <iframe id="vPlayer" class="hidden w-full h-full" allowfullscreen></iframe>
-                <i id="loader" class="ph-bold ph-spinner-gap animate-spin text-4xl text-gray-600"></i>
+    <div class="fixed top-4 left-4 right-4 max-w-4xl mx-auto z-50">
+        <div class="neon-header rounded-full px-4 py-3 shadow-xl flex justify-between items-center transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xl shadow-inner">
+                    <i class="ph-fill ph-play-circle"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-black text-xl text-gray-900 dark:text-white leading-none">Msci Learn<span class="text-brand dark:text-gold"> Player</span></span>
+                </div>
+            </div>
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-lg dark:text-white shadow-inner">
+                <i id="themeIcon" class="ph-bold ph-moon"></i>
+            </button>
+        </div>
+    </div>
+
+    <main class="pt-28 px-4 max-w-4xl mx-auto w-full flex flex-col gap-6">
+        
+        <div class="magic-card aspect-video w-full shadow-2xl">
+            <div class="w-full h-full relative z-10 bg-black rounded-[1.4rem] overflow-hidden flex items-center justify-center">
+                <i id="loader" class="ph-duotone ph-spinner-gap animate-spin text-4xl text-brand"></i>
+                <iframe id="vPlayer" class="hidden w-full h-full" frameborder="0" allowfullscreen></iframe>
             </div>
         </div>
-        <div class="flex flex-col gap-4">
-            <a href="#" id="dlBtn" class="magic-box shape-pill text-center"><div class="py-4 relative z-10 font-bold text-lg text-emerald-500 uppercase tracking-widest bg-emerald-500/10 rounded-full">Direct Download</div></a>
-            <a href="#" id="tgBtn" class="magic-box shape-pill text-center"><div class="py-4 relative z-10 font-bold text-lg text-blue-500 uppercase tracking-widest bg-blue-500/10 rounded-full">Get File In Telegram</div></a>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#" id="dlBtn" class="magic-btn flex-1 text-center group">
+                <div class="py-4 w-full relative z-10 font-bold text-emerald-500 uppercase flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-download-simple text-xl group-hover:-translate-y-1 transition-transform"></i> Direct Download
+                </div>
+            </a>
+            <a href="#" id="tgBtn" class="magic-btn flex-1 text-center group">
+                <div class="py-4 w-full relative z-10 font-bold text-blue-500 uppercase flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-telegram-logo text-xl group-hover:scale-110 transition-transform"></i> Get In Telegram
+                </div>
+            </a>
         </div>
+
     </main>
 
     <script>
-        // Theme & Config
         const html = document.documentElement;
-        function toggleTheme() {
-            html.classList.toggle('dark');
-            document.getElementById('themeIcon').className = html.classList.contains('dark') ? 'ph-bold ph-sun' : 'ph-bold ph-moon';
-        }
+        function toggleTheme() { html.classList.toggle('dark'); document.getElementById('themeIcon').className = html.classList.contains('dark') ? 'ph-bold ph-sun' : 'ph-bold ph-moon'; }
 
-        // Firebase Setup (Vercel env variables ko config mein paste karein)
-        const firebaseConfig = { apiKey: "API_KEY", projectId: "PROJ_ID", appId: "APP_ID" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        // VERCEL API FETCH (NO FIREBASE SDK HERE)
         const slug = new URLSearchParams(window.location.search).get('id');
+        const PUBLIC_KEY = "MsciPlayer_Public_Key_123"; // Update this matching your backend
+
         if(slug) {
-            db.collection("videos").doc(slug).get().then(doc => {
-                if(doc.exists) {
-                    const d = doc.data();
+            fetch(`/api/video?action=get_video&id=${slug}`, {
+                headers: { 'x-api-key': PUBLIC_KEY }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
                     const vp = document.getElementById('vPlayer');
-                    vp.src = d.iframeUrl; vp.classList.remove('hidden');
+                    vp.src = data.iframeUrl; vp.classList.remove('hidden');
                     document.getElementById('loader').classList.add('hidden');
-                    document.getElementById('dlBtn').href = d.downloadUrl;
-                    document.getElementById('tgBtn').href = d.telegramUrl;
-                }
+                    document.getElementById('dlBtn').href = data.downloadUrl;
+                    document.getElementById('tgBtn').href = data.telegramUrl;
+                } else { alert("Video Error: " + data.error); }
             });
         }
     </script>
